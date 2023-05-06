@@ -185,3 +185,9 @@ OGC的元数据管理标准是互联网目录服务(Catalog Service for the Web,
 
 [这个网站](<https://shapely.readthedocs.io/en/latest/index.html>)是shapely的文档
 
+[这个网站](<https://pillow.readthedocs.io/en/latest/index.html>)是Pillow的文档
+
+[这个网站](<http://www.spectralpython.net/>)是SPY的官网
+
+
+

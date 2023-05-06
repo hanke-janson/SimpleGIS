@@ -12,6 +12,7 @@ print(sys.path)
 # 检查python版本，下载与之对应的gdal发行包，通过pip进行本地手动安装 pip install C:\Users\admin\Downloads\GDAL-3.4.2-cp37-cp37m-win_amd64.whl
 # Ubuntu下
 # sudo apt install gdal-bin    sudo apt install python-gdal
+import time
 
 """
 from osgeo import gdal
@@ -478,3 +479,185 @@ print(raster.RasterXSize)
 print(raster.RasterYSize)
 """
 # NumPy 专为Python和科学计算设计的一款高效、多维Python数组处理工具
+# NumPy库可以和GDAL、Shapely、Python影像库(the Python Imaging Library, PIL)以及其他领域的Python科学计算库交换数据
+"""
+from osgeo import gdal_array
+
+srcArray = gdal_array.LoadFile("./SatImage.tif")
+print(len(srcArray))
+band1 = srcArray[0]
+band2 = srcArray[1]
+band3 = srcArray[2]
+# 将第一个波段保存为jpg图片
+gdal_array.SaveArray(band1, "band1.jpg", format="JPEG")
+gdal_array.SaveArray(band2, "band2.jpg", format="JPEG")
+gdal_array.SaveArray(band3, "band3.jpg", format="JPEG")
+"""
+# PIL库 原本是用来处理遥感影像的，在python中一般用于图像编辑，对于Python3来说，可以使用PIL库的升级版本Pillow 通过pip安装 pip install Pillow
+"""
+try:
+    import Image
+    import ImageDraw
+except:
+    from PIL import Image
+    from PIL import ImageDraw
+import shapefile
+
+r = shapefile.Reader("hancock.shp")
+# 获取shp数据的边框经纬度值 r.bbox
+xdist = r.bbox[2] - r.bbox[0]
+ydist = r.bbox[3] - r.bbox[1]
+iwidth = 400
+iheight = 600
+xratio = iwidth / xdist
+yratio = iheight / ydist
+pixels = []
+# 获取所有的经纬度 r.shapes()[0].points
+# 经纬度转屏幕坐标
+for x, y in r.shapes()[0].points:
+    px = int(iwidth - ((r.bbox[2] - x) * xratio))
+    py = int((r.bbox[3] - y) * yratio)
+    pixels.append((px, py))
+img = Image.new("RGB", (iwidth, iheight), "white")
+draw = ImageDraw.Draw(img)
+draw.polygon(pixels, fill="rgb(198, 204, 189)", outline="rgb(203, 196, 190)", width=1)
+img.save("hancock.png")
+"""
+# PNGCanvas "轻量级PIL" pip install pngcanvas
+"""
+import shapefile
+import pngcanvas
+
+r = shapefile.Reader("hancock.shp")
+xdist = r.bbox[2] - r.bbox[0]
+ydist = r.bbox[3] - r.bbox[1]
+iwidth = 400
+iheight = 600
+xratio = iwidth / xdist
+yratio = iheight / ydist
+pixels = []
+for x, y in r.shapes()[0].points:
+    px = int(iwidth - ((r.bbox[2]) - x) * xratio)
+    py = int((r.bbox[3] - y) * yratio)
+    pixels.append([px, py])
+c = pngcanvas.PNGCanvas(iwidth, iheight)
+c.polyline(pixels)
+f = open("hancock_pngcvs.png", "wb")
+f.write(c.dump())
+f.close()
+"""
+
+# Pandas 是一款高性能的Python数据分析库 可以处理海量数据表格(类似数据库)、有序化/无序化、标签化矩阵以及无标记的统计数据
+# GeoPandas 是由Shapely、Fiona、PyProj、matplotlib、Descartes以及其他必需的库一同构建的Pandas的地理空间扩展，还需要特定的数据库提供支持，如PostGIS
+# pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade geopandas
+"""
+import geopandas
+# pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade matplotlib
+import matplotlib.pyplot as plt
+# 打开shp文件，转储为Geojson格式后绘制一张地图
+gdf = geopandas.GeoDataFrame
+census = gdf.from_file("GIS_CensusTract_poly.shp")
+print(census)
+census.plot()
+plt.show()
+"""
+# PyMySQL  pip install pymysql
+# mysql空间功能不足之处在于采用的是平面几何和矩形边框而非立体几何形状
+"""
+import pymysql
+
+# 创建数据库
+conn = pymysql.connect(host='localhost', port=3306, user='root', passwd='123456', db='mysql')
+# 获取游标对象
+cur = conn.cursor()
+cur.execute("DROP DATABASE IF EXISTS spatial_db")
+cur.execute("CREATE DATABASE spatial_db")
+cur.close()
+conn.close()
+# 数据库操作
+conn = pymysql.connect(host='localhost', port=3306, user='root', passwd='123456', db='spatial_db')
+cur = conn.cursor()
+cur.execute("create table places(id int not null auto_increment primary key, "
+            "name varchar(50) not null, "
+            "location Geometry not null)")
+cur.execute("insert into places(name, location) values('NEW ORLEANS', ST_GeomFromText('POINT(30.03 90.03)'))")
+cur.execute("insert into places(name, location) values('MEMPHIS', ST_GeomFromText('POINT(35.05 90.00)'))")
+conn.commit()
+cur.execute("select ST_AsText(location) from places")
+# 列表生成式
+p1, p2 = [p[0] for p in cur.fetchall()]
+print(p1)
+print(p2)
+cur.execute("set @p1 = ST_GeomFromText('{}')".format(p1))
+cur.execute("set @p2 = ST_GeomFromText('{}')".format(p2))
+cur.execute("select ST_Distance(@p1, @p2)")
+d = float(cur.fetchone()[0])
+print("{:.2f} miles from New Orleans to Memphis".format(d * 70))
+cur.close()
+conn.close()
+"""
+# PyFPDF 是一种轻量级的创建包括地图 等PDF文件的解决方案
+# PDF格式是一种非常流行的标准，也常常用来发布地图  Python 3.7+ support    pip install fpdf2
+# 该模块使用了一种单元格的概念来对页面上的元素进行布局
+# 导入之前的png地图后，将其转换为pdf文件创建简单地图
+"""
+import fpdf
+
+# PDF对象构造器  图片，毫米为单位，A4页面大小
+pdf = fpdf.FPDF("p", "mm", "A4")
+# 创建一个新页面
+pdf.add_page()
+# 设置字体样式 arial, bold, size 20
+pdf.set_font("Arial", "B", 20)
+# 单元格布局样式 160 * 25mm, 标题, 无边框 居中
+pdf.cell(160, 25, 'Hancock County Boundary', border=0, align="C")
+# 按指定尺寸写入图片
+pdf.image("hancock.png", 25, 50, 110, 160)
+# 文件保存 文件名，F=文件类型
+pdf.output("map.pdf", 'F')
+"""
+# Spectral Python, SPY是Python光谱功能包，是一款专门处理遥感应用的高级功能包 使用数据来自官网示例
+# pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade spectral
+"""
+from spectral import *
+
+img = open_image("92AV3C.lan")
+# img 是一个BilFile对象 是SpyFile的子类
+# print(img.__class__)
+# 因为高光谱影像通常很大，当SpyFile对象被创建时，只读取元数据，影像数据只有在通过SpyFile方法请求时才会被读取
+print(img)
+# 加载影像
+# SPY根据需要读取数据还不缓存
+# 返回一个ImageArray对象 NOTE: 在调用 load() 方法前，一定要考虑返回的ImageArray对象会消耗的内存大小，谨防内存溢出。
+arr = img.load()
+print(arr.info())
+# numpy memmap接口 返回一个numpy memmap对象
+# 作为加载整景高光谱影像到内存的替代方法，这是一种稍微有点慢但内存使用效率更高的访问影像数据，既可以用来读取数据，也可以将数据写入影像文件
+# numpy_arr = img.open_memmap()
+# print(numpy_arr)
+"""
+# 显示图像
+"""
+from spectral import *
+img = open_image('92AV3C.lan')
+view = imshow(img, (29, 19, 9))
+# save_rgb('rgb.jpg', img, [29, 19, 9])
+"""
+# 类图显示
+"""
+from spectral import *
+
+img = open_image('92AV3C.lan')
+gt = open_image('92AV3GT.GIS').read_band(0)
+# save_rgb('gt.jpg', gt, colors=spy_colors)
+view = imshow(img, (30, 20, 10), classes=gt)
+view.set_display_mode('overlay')
+view.class_alpha = 0.5
+"""
+# 光谱绘制
+"""
+from spectral import *
+import spectral.io.aviris as aviris
+img = open_image('92AV3C.lan')
+img.bands = aviris.read_aviris_bands('92AV3C.spc')
+"""

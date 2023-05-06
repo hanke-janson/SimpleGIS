@@ -40,12 +40,12 @@ y_ratio = map_height / dist_y
 def convert(point):
     lon = point[0]
     lat = point[1]
-    x = map_width - ((maxx - lon) * x_ratio)
-    y = map_height - ((maxy - lat) * y_ratio)
+    px = map_width - ((maxx - lon) * x_ratio)
+    py = map_height - ((maxy - lat) * y_ratio)
     # turtle的坐标原点在画板中心
-    x = x - (map_width / 2)
-    y = y - (map_height / 2)
-    return [x, y]
+    px = px - (map_width / 2)
+    py = py - (map_height / 2)
+    return [px, py]
 
 
 # 绘制州
