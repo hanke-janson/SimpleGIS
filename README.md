@@ -189,5 +189,8 @@ OGC的元数据管理标准是互联网目录服务(Catalog Service for the Web,
 
 [这个网站](<http://www.spectralpython.net/>)是SPY的官网
 
+[第三方模块.py](<./第三方模块.py>)
 
+## Python 与地理信息系统
 
+[python与地理信息系统.md](<./Python与地理信息系统.md>)
