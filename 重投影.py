@@ -79,6 +79,7 @@ tgt_spatRef.MorphToESRI()
 prj = open(lyrName + ".prj", "w")
 prj.write(tgt_spatRef.ExportToWkt())
 prj.close()
+# dfb属性文件不会变化，所以直接把属性文件拷贝过来
 srcDbf = os.path.splitext(srcName)[0] + ".dbf"
 tgtDbf = lyrName + ".dbf"
 shutil.copyfile(srcDbf, tgtDbf)
