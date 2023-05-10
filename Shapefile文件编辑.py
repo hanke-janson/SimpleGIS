@@ -265,7 +265,6 @@ for f in shp_files:
     r = shapefile.Reader(f)
     # 复制几何图形
     for s in r.shapes():
-        # w._shapeparts(parts=[s.points], shapeType=s.shapeType)
         w.poly([s.points])
     r.close()
 w.close()
