@@ -283,3 +283,16 @@ CSV格式，它是一种数据结果非常简单的行列式电子表格文本�
 
 这里使用xlrd模块和xlwt模块，和PyShp库一同使用，可以使得电子表格和Shapefile文件之间来回切换。
 
+# 使用GPS数据
+
+[使用GPS数据.py](./使用GPS数据.py)
+
+目前最流行的GPS数据类型是Garmin GPX，并且已经是业内事实上的标准。
+因为它是一种XML文件，所以也遵循格式优良的XML文档规范。
+
+但是还有另外一种早于XML和GPX的GPS数据格式，叫美国国家海洋电子协会标准(National Marine Electronics Association, **NMEA**)。
+这些数据是由ASCII文本流构成的。在全球船舶定位自动识别系统船舶位置通信方面应用。
+
+使用pynmea库处理。
+
+通过[此网站](<http://aprs.gids.nl/nmea/>)了解与NMEA相关的更多信息。
