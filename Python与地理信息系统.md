@@ -296,3 +296,15 @@ CSV格式，它是一种数据结果非常简单的行列式电子表格文本�
 使用pynmea库处理。
 
 通过[此网站](<http://aprs.gids.nl/nmea/>)了解与NMEA相关的更多信息。
+
+# 地理化编码
+
+[地理化编码.py](./地理化编码.py)
+
+地理化编码是将街道位置信息转换为经纬度的过程。
+该操作常见于车辆导航系统和在线位置导航网站。
+对于该操作可以使用geocoder和geopy库。
+[geopy库](<https://geopy.readthedocs.io/en/stable/>)甚至可以帮助用户将一个地理编码转换为经纬度以便匹配与之相关的最近位置。
+
+>pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade geopy
+
